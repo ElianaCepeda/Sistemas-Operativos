@@ -1,3 +1,11 @@
+/*******************************************************************
+Autor: Eliana Cepeda
+Materia: Sistemas Operativos
+Fecha: 1-Agosto-2024
+Tema: Uso de punteros:
+	- &
+	- *
+********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 

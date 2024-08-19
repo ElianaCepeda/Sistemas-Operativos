@@ -1,3 +1,9 @@
+/*******************************************************************
+Autor: Eliana Cepeda
+Materia: Sistemas Operativos
+Fecha: 1-Agosto-2024
+Tema: Concatenacion de cadenas de caracteres
+********************************************************************/
 #include <stdio.h>
 #include <string.h>
 

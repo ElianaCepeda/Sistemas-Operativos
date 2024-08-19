@@ -1,3 +1,10 @@
+/*******************************************************************
+Autor: Eliana Cepeda
+Materia: Sistemas Operativos
+Fecha: 1-Agosto-2024
+Tema: Asignación de memoria dinamica
+	Uso funcion realoc para redimensionar la memoria asignada
+********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -1,3 +1,10 @@
+/*******************************************************************
+Autor: Eliana Cepeda
+Materia: Sistemas Operativos
+Fecha: 8-Agosto-2024
+Tema: Suma de lista de numeros
+	Uso de scanf
+********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 
