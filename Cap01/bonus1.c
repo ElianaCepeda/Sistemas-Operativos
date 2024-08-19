@@ -1,3 +1,11 @@
+
+/*******************************************************************
+Autor: Eliana Cepeda
+Materia: Sistemas Operativos
+Fecha: 1-Agosto-2024
+Tema: Concatenación de strings
+  - Uso de funciones para concaterar strings
+********************************************************************/
 #include <stdio.h>
 #include <string.h>
 

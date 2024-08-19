@@ -1,3 +1,12 @@
+
+/*******************************************************************
+Autor: Eliana Cepeda
+Materia: Sistemas Operativos
+Fecha: 1-Agosto-2024
+Tema: Asignacion de memoria
+  - uso de calloc
+********************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 
