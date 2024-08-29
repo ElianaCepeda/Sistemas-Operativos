@@ -1,93 +1,52 @@
 /******************************************************************
 Estudiante: Eliana Cepeda
+Fecha: 29-08-2024
 Materia: Sistemas Operativos
-Tema: Taller C Modular
-  - Rediemnsionamiento de vector de cadenas de caracteres
-  - uso de malloc y realloc
+Tema: Laboratorio Compilación modular
+  - Funcionamiento del codigo
+  - Modularización del codigo
+  - Creacion de fichero de Automatizacion de compilación
 *******************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
+#include "Libreria_lab.h"
 
-#define CAPACIDAD_INICIAL 4
-
-/*Creación Estructura de Datos para el Vector*/
-typedef struct vectorDinamico{
-        int capacidad;
-        int totalElementos;
-        void **elementos;
-} vectorDinamico;
-
-void vectorInicio(vectorDinamico *V){
-        V->capacidad = CAPACIDAD_INICIAL;
-        V->totalElementos = 0;
-        V->elementos = malloc(sizeof(void *) * V->capacidad); 
-}
-
-int totalVector(vectorDinamico *V){
-        return V->totalElementos;
-}
-
-static void resizeVector(vectorDinamico *V, int capacidad){
-        printf("Redimensión: %d a %d \n", V->capacidad, capacidad);
-
-        void **elementos = realloc(V->elementos, sizeof(void *) * capacidad);
-        if(elementos){
-                V->elementos = elementos;
-                V->capacidad = capacidad;
-        }
-}
-
-void addVector(vectorDinamico *V, void *elemento){
-        if(V->capacidad == V->totalElementos)
-                resizeVector(V, V->capacidad*2);
-        V->elementos[V->totalElementos++] = elemento;
-}
-
-void freeVector(vectorDinamico *V){
-        free(V->elementos);
-}
-
-void *getVector(vectorDinamico *V, int indice){
-        if(indice >= 0 && indice < V->totalElementos)
-                return V->elementos[indice];
-        return NULL;
-}
-
-void setVector(vectorDinamico *V, int indice, void *elemento){
-        if(indice >= 0 && indice < V->totalElementos)
-                V->elementos[indice]=elemento;
-}
-
-
-void borrarVector(vectorDinamico *V, int indice){
-        if(indice < 0 || indice >= V->totalElementos)
-                return; 
-
-        V->elementos[indice] = NULL;
-
-        for(int i=indice; i<V->totalElementos-1; i++){
-                V->elementos[i] = V->elementos[i+1];
-                V->elementos[i+1] = NULL; 
-        }
-        V->totalElementos--;
-        if(V->totalElementos>0 && V->totalElementos == V->capacidad/4)
-                resizeVector(V, V->capacidad/2);
-}
 
 int main(){
+        int i=0;
+        
         vectorDinamico editor;
         vectorInicio(&editor);
 
         addVector(&editor, "Hola");
         addVector(&editor, "Profesional");
+        addVector(&editor, "en");
+        addVector(&editor, "Formación");
+        addVector(&editor, "de");
+        addVector(&editor, "Ingeniería");
+
+        printf("\n");
 
         for (i = 0; i < totalVector(&editor); i++)
-        printf("%s", (char *) getVector(&editor, k));
+        printf("%s ", (char *) getVector(&editor, i));
+        printf("\n");
 
-        borrarVector(&editor, 1);
+        int j=5;
+        while(j>=2){
+                borrarVector(&editor, j);
+                j--;
+        }
 
         setVector(&editor, 1, "Buenos");
-
-
+        addVector(&editor, "días");
+        
+        printf("\n");
         for (i = 0; i < totalVector(&editor); i++)
-        printf("%s ", (char *) getVector(&editor, k));
+        printf("%s ", (char *) getVector(&editor, i));
+
+        printf("\n");
+        
+        freeVector( &editor);
+
+        return 0;
+}
