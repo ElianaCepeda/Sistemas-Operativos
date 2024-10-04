@@ -29,18 +29,21 @@ Tema: Comunicación uni-direccional
     printf("\n  \t\t >>>>>>>>>>> Inicio servidor <<<<<<<<<<<<<< \n");
 
     /* Create the FIFO if it does not exist */
-    mknod(FIFO_FILE, S_IFIFO|0640, 0); // 2 lectura, 4 escritura
-    strcpy(end, "fin");
+    mknod(FIFO_FILE, S_IFIFO|0640, 0); // codigos para permisos 2 lectura, 4 escritura y se suman si son ambos permisos
+    strcpy(end, "fin"); // recibe la cadena que indica que hay que cerrarlo
 
     while(1) { // bucle infinito que solo sale si recibe "fin"
-       fd = open(FIFO_FILE, O_RDONLY);
-            read_bytes = read(fd, readbuf, sizeof(readbuf)); 
-            readbuf[read_bytes] = '\0'; 
-                printf("Received string: \"%s\" and length is %d\n", readbuf, (int)strlen    (readbuf));
-       to_end = strcmp(readbuf, end);
+       fd = open(FIFO_FILE, O_RDONLY); // indica que el FIFO solo de abre en lectura
+            read_bytes = read(fd, readbuf, sizeof(readbuf));  //guarda los datos que recibe en el bus
+            readbuf[read_bytes] = '\0'; // le agrega el cambio de linea para imprimirlo lindo 
+                printf("Received string: \"%s\" and length is %d\n", readbuf, (int)strlen    (readbuf)); // imprime la cadena que recibió
+       to_end = strcmp(readbuf, end); // compara si la cadena recibida es "fin"
+       // verifica si la cadena era "fin" y cierra el fichero
        if (to_end == 0) {
           close(fd);
           break;
        }
+
+       // no se esta eliminando el fichero
     }
  }
