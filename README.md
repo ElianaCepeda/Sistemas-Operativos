@@ -9,14 +9,14 @@ challenge5: Asignación de memoria (realloc)
 bonus1: concatenacion de cadenas  
 punteros: uso de "&" y "*" para uso de punteros  
 suma: suma de lista de numeros hasta digitar 0  
-## Gestión de Memoria
+### Gestión de Memoria
 callocApp  
 malloc  
 reallocApp  
 MatrizV0  
 MatrizV1  
 
-## Cepeda_Lab_MOD
+### Cepeda_Lab_MOD
 Archivos correspondientes al taller de modulación
 
 ## Cap02
@@ -28,3 +28,6 @@ Creación de pipeName unidireccional, codigos de cliente y servidor
 
 ### Taller_Inicial_Fork
 suma de numeros leyendo archivos y separando los procesos con ayuda de fork y memoria dinamica 
+
+### PipeName_Bidireccional
+cliente y servidor comunicandose por un pipeName bi-direccional
