@@ -19,4 +19,9 @@ MatrizV1
 ## Cepeda_Lab_MOD
 Archivos correspondientes al taller de modulación
 
+## Cap02
+### Taller-Fork
+Identificaión de creación de nuevos procesos e identifiación de padres e hijos en el arbol de procesos
 
+### Taller-pipeName
+Creación de pipeName unidireccional, codigos de cliente y servidor
