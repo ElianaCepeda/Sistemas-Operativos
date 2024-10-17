@@ -25,3 +25,6 @@ Identificaión de creación de nuevos procesos e identifiación de padres e hijo
 
 ### Taller-pipeName
 Creación de pipeName unidireccional, codigos de cliente y servidor
+
+### Taller_Inicial_Fork
+suma de numeros leyendo archivos y separando los procesos con ayuda de fork y memoria dinamica 
