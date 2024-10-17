@@ -42,17 +42,22 @@ int main() {
    
    while (1) { //bucle infinito hasta que recibe la cadena de finalización y acaba el proceso
       printf("Enter string: ");
-      fgets(readbuf, sizeof(readbuf), stdin);
-      stringlen = strlen(readbuf);
-      readbuf[stringlen - 1] = '\0';
-      end_process = strcmp(readbuf, end_str);
+      fgets(readbuf, sizeof(readbuf), stdin); // escribe la cadena que pone el cliente en el bus
+      stringlen = strlen(readbuf); //cantidad de caracteres que escribe
+      readbuf[stringlen - 1] = '\0'; // adiciona signor de cambio de linea
+      end_process = strcmp(readbuf, end_str); // compara si la cadena es "end"
       
-      //printf("end_process is %d\n", end_process);
+
+      //  valida si la cadena es "end" para terminar el proceso   
+
       if (end_process != 0) {
+        // si no lo es escribe la cadena en el Pipe
          write(fd, readbuf, strlen(readbuf));
          printf("FIFOCLIENT: Sent string: \"%s\" and string length is %d\n", readbuf, (int)strlen(readbuf));
+
+         //guarda los datos que recibe en el bus
          read_bytes = read(fd, readbuf, sizeof(readbuf));
-         readbuf[read_bytes] = '\0';
+         readbuf[read_bytes] = '\0'; // le agrega el cambio de linea para imprimirlo lindo
          printf("FIFOCLIENT: Received string: \"%s\" and length is %d\n", readbuf, (int)strlen(readbuf));
       } else {
          write(fd, readbuf, strlen(readbuf));
