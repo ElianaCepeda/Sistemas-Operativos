@@ -29,8 +29,7 @@ int main(int argc, char *argv[]){
     int p = (int) atoi(argv[1]);
     for(int i=0; i<p; i++)
         creacion_fork(i);
-
-
+    
     printf("\n\n");
     return 0;
 }

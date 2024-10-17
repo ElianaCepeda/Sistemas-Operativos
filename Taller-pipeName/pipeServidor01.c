@@ -36,7 +36,7 @@ Tema: Comunicación uni-direccional
        fd = open(FIFO_FILE, O_RDONLY); // indica que el FIFO solo de abre en lectura
             read_bytes = read(fd, readbuf, sizeof(readbuf));  //guarda los datos que recibe en el bus
             readbuf[read_bytes] = '\0'; // le agrega el cambio de linea para imprimirlo lindo 
-                printf("Received string: \"%s\" and length is %d\n", readbuf, (int)strlen    (readbuf)); // imprime la cadena que recibió
+                printf("Cadena Recibida: \"%s\" y su largo es %d\n", readbuf, (int)strlen    (readbuf)); // imprime la cadena que recibió
        to_end = strcmp(readbuf, end); // compara si la cadena recibida es "fin"
        // verifica si la cadena era "fin" y cierra el fichero
        if (to_end == 0) {
