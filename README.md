@@ -31,3 +31,8 @@ suma de numeros leyendo archivos y separando los procesos con ayuda de fork y me
 
 ### PipeName_Bidireccional
 cliente y servidor comunicandose por un pipeName bi-direccional
+
+## Cap03
+###Proyecto
+
+### Taller_Rendimiento_Grupo
