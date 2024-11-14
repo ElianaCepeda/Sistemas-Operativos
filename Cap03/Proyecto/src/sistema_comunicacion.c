@@ -3,89 +3,104 @@
 	Autor: Daniel Castro, Maria Ruiz, Daniel Gonzalez, Eliana Cepeda
 	Fecha: Noviembre 2024
 	Materia: Sistemas Operativos
-	Tema: Este proyecto implementa un sistema de distribución de noticias usando procesos en C 
-		y comunicación mediante pipes nominales (FIFOs). El sistema permite que un publicador envíe 
-		noticias a un sistema de comunicación, el cual las distribuye a los suscriptores interesados en temas específicos.
+	Tema: Proyecto Sistema de Comunicacion
+	Objetivo: Este proyecto implementa un sistema de distribución de noticias usando procesos en C 
+    y comunicación mediante pipes nominales (FIFOs). El sistema permite que un `publicador` envíe 
+    noticias a un `sistema de comunicación`, el cual las distribuye a los `suscriptores` interesados en temas específicos.
 ****************************************************************/
-#include <stdio.h>              // Incluye funciones estándar de entrada/salida
-#include <stdlib.h>             // Incluye funciones estándar de C
-#include <string.h>             // Incluye funciones para manejo de cadenas
-#include <fcntl.h>              // Incluye constantes y funciones para control de archivos
-#include <unistd.h>             // Incluye funciones POSIX, como `read` y `write`
-#include <sys/stat.h>           // Incluye constantes para operaciones de estado de archivos
-#include <errno.h>              // Incluye el manejo de códigos de error
 
-#define BUFFER_SIZE 1024        // Tamaño máximo del buffer para lectura/escritura
+#include <stdio.h>              // Biblioteca estándar para funciones de entrada/salida
+#include <stdlib.h>             // Biblioteca estándar para funciones generales de C
+#include <string.h>             // Biblioteca para manejo de cadenas de caracteres
+#include <unistd.h>             // Biblioteca POSIX para manejo de archivos y procesos
+#include <fcntl.h>              // Biblioteca para control de archivos (flags como O_WRONLY, O_NONBLOCK)
+#include <sys/stat.h>           // Biblioteca para manejo de archivos (permisos y tipos de archivos)
+#include <errno.h>              // Biblioteca para manejo de errores
+#include <sys/select.h>         // Biblioteca para monitorear múltiples descriptores de archivos
+#include <time.h>               // Biblioteca para funciones y estructuras de tiempo
+#include "SCBiblioteca.h"
 
+// Función principal del sistema de distribución de noticias
 int main(int argc, char *argv[]) {
-    char *pipeSSC = NULL;       // Puntero para almacenar el nombre del pipe compartido
-    for (int i = 1; i < argc; i++) {  // Procesa los argumentos de línea de comandos
-        if (strcmp(argv[i], "-s") == 0 && i + 1 < argc) {
-            pipeSSC = argv[++i];  // Asigna el siguiente argumento como `pipeSSC` si se encuentra `-s`
+    char *pipePSC = NULL, *pipeSSC = NULL;  // Variables para almacenar los nombres de los pipes
+    int timeF = 0;                          // Tiempo de inactividad para finalizar la transmisión
+
+    // Procesa los argumentos de la línea de comandos
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
+            pipePSC = argv[++i];
+        } else if (strcmp(argv[i], "-s") == 0 && i + 1 < argc) {
+            pipeSSC = argv[++i];
+        } else if (strcmp(argv[i], "-t") == 0 && i + 1 < argc) {
+            timeF = atoi(argv[++i]);
         }
     }
-    if (!pipeSSC) {              // Verifica que se haya proporcionado `pipeSSC`
-        fprintf(stderr, "Usage: suscriptor -s pipeSSC\n");
-        exit(EXIT_FAILURE);       // Termina el programa si falta el argumento
-    }
-
-    // Genera una ruta única en /tmp para el pipe del suscriptor
-    char pipeUnique[BUFFER_SIZE];
-    snprintf(pipeUnique, sizeof(pipeUnique), "/tmp/pipeS_%d", getpid()); // Usa el PID para crear un nombre único
-    if (mkfifo(pipeUnique, 0666) == -1 && errno != EEXIST) { // Crea el pipe y verifica errores
-        perror("Error creating unique pipe in /tmp"); // Muestra mensaje de error si no se pudo crear el pipe
+    if (!pipePSC || !pipeSSC || timeF <= 0) { // Verifica que los parámetros necesarios estén presentes
+        fprintf(stderr, "Usage: sistema -p pipePSC -s pipeSSC -t timeF\n");
         exit(EXIT_FAILURE);
     }
 
-    // Abre el pipe compartido para enviar temas de suscripción y el nombre del pipe único
-    int fd_shared = open(pipeSSC, O_WRONLY);  // Abre `pipeSSC` en modo escritura
-    if (fd_shared == -1) {        // Verifica si `pipeSSC` se abrió correctamente
-        unlink(pipeUnique);       // Elimina `pipeUnique` si falla la apertura de `pipeSSC`
-        perror("Error opening shared pipe for topics");
+    mkfifo(pipePSC, 0666);  // Crea el pipe de publicador
+    mkfifo(pipeSSC, 0666);  // Crea el pipe de suscriptor
+
+    int fdPSC = open(pipePSC, O_RDONLY | O_NONBLOCK);  // Abre `pipePSC` en modo no bloqueante
+    int fdSSC = open(pipeSSC, O_RDONLY | O_NONBLOCK);  // Abre `pipeSSC` en modo no bloqueante
+
+    if (fdPSC == -1 || fdSSC == -1) {  // Verifica si los pipes se abrieron correctamente
+        perror("Error opening pipes");
         exit(EXIT_FAILURE);
     }
 
-    // Solicita al usuario los temas de interés
-    char topics[BUFFER_SIZE];
-    printf("Enter topics of interest (e.g., A E S): ");
-    fgets(topics, sizeof(topics), stdin);      // Lee los temas de la entrada estándar
-    topics[strcspn(topics, "\n")] = '\0';      // Elimina el carácter de nueva línea
+    char buffer[BUFFER_SIZE];          // Buffer para leer datos de los pipes
+    fd_set read_fds;                   // Conjunto de descriptores para `select`
+    int max_fd = (fdPSC > fdSSC ? fdPSC : fdSSC) + 1; // Calcula el descriptor máximo para `select`
 
-    // Envía los datos de suscripción en formato "pipeUnique:topics"
-    dprintf(fd_shared, "%s:%s\n", pipeUnique, topics);  // Escribe en `pipeSSC`
-    close(fd_shared);           // Cierra el pipe compartido
+    last_news_time = time(NULL);       // Inicializa el tiempo de la última noticia
+    printf(">>> SYSTEM STARTED <<<\n");
 
-    // Abre el pipe único en modo lectura bloqueante para recibir noticias
-    int fd = open(pipeUnique, O_RDONLY);       // Abre `pipeUnique` en modo lectura
-    if (fd == -1) {           // Verifica si `pipeUnique` se abrió correctamente
-        unlink(pipeUnique);    // Elimina `pipeUnique` si falla la apertura
-        perror("Error opening unique pipe for reading news");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("Waiting for news on selected topics...\n");
-    char buffer[BUFFER_SIZE];  // Buffer para almacenar las noticias recibidas
-
-    // Lee noticias hasta recibir el mensaje de "End of news broadcast"
     while (1) {
-        int bytesRead = read(fd, buffer, sizeof(buffer) - 1);  // Lee datos de `pipeUnique`
-        if (bytesRead > 0) {
-            buffer[bytesRead] = '\0';     // Agrega terminador nulo a la cadena leída
+        FD_ZERO(&read_fds);            // Inicializa el conjunto de descriptores de lectura
+        FD_SET(fdPSC, &read_fds);      // Agrega `fdPSC` al conjunto
+        FD_SET(fdSSC, &read_fds);      // Agrega `fdSSC` al conjunto
 
-            // Verifica si el mensaje es el fin de la transmisión
-            if (strcmp(buffer, "End of news broadcast.\n") == 0) {
-                printf("%s", buffer);     // Muestra el mensaje de fin de transmisión
-                break;                    // Termina el bucle al recibir el mensaje de fin
+        struct timeval timeout;
+        timeout.tv_sec = 1;            // Tiempo de espera de 1 segundo
+        timeout.tv_usec = 0;
+
+        if (select(max_fd, &read_fds, NULL, NULL, &timeout) > 0) { // Monitorea los descriptores de archivo
+            if (FD_ISSET(fdPSC, &read_fds)) {  // Verifica si hay datos en `fdPSC`
+                int bytes_read = read(fdPSC, buffer, sizeof(buffer) - 1);
+                if (bytes_read > 0) {
+                    buffer[bytes_read] = '\0';   // Agrega terminador nulo a la cadena leída
+                    printf("News received from publisher: %s\n", buffer);
+                    last_news_time = time(NULL); // Actualiza el tiempo de la última noticia
+                    almacenar_noticia(buffer);   // Almacena la noticia
+
+                    // Distribuye la noticia a todos los suscriptores
+                    for (int i = 0; i < num_suscriptores; i++) {
+                        enviar_noticia_a_suscriptor(&suscriptores[i], &noticias[num_noticias - 1]);
+                    }
+                }
             }
+            if (FD_ISSET(fdSSC, &read_fds)) {  // Verifica si hay datos en `fdSSC`
+                int bytes_read = read(fdSSC, buffer, sizeof(buffer) - 1);
+                if (bytes_read > 0) {
+                    buffer[bytes_read] = '\0';
+                    registrar_suscriptor(buffer);  // Registra al suscriptor y envía noticias relevantes
+                }
+            }
+        }
 
-            printf("Received news: %s\n", buffer); // Muestra las noticias recibidas
-        } else if (bytesRead < 0){        // Si ocurre un error en la lectura
-            perror("Error reading from unique pipe"); // Muestra mensaje de error
+        // Verifica inactividad en `pipePSC` (pipe de publicador)
+        if (difftime(time(NULL), last_news_time) >= timeF) {
+            finalizar_transmision();   // Finaliza la transmisión si hay inactividad
             break;
         }
     }
 
-    close(fd);                 // Cierra `pipeUnique`
-    unlink(pipeUnique);        // Elimina `pipeUnique` después de finalizar
-    return 0;                  // Termina el programa exitosamente
+    close(fdPSC);                      // Cierra `fdPSC`
+    close(fdSSC);                      // Cierra `fdSSC`
+    unlink(pipePSC);                   // Elimina `pipePSC`
+    unlink(pipeSSC);                   // Elimina `pipeSSC`
+    return 0;
 }

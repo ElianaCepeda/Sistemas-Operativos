@@ -3,10 +3,12 @@
 	Autor: Daniel Castro, Maria Ruiz, Daniel Gonzalez, Eliana Cepeda
 	Fecha: Noviembre 2024
 	Materia: Sistemas Operativos
-	Tema: Este proyecto implementa un sistema de distribución de noticias usando procesos en C 
-		y comunicación mediante pipes nominales (FIFOs). El sistema permite que un publicador envíe 
-		noticias a un sistema de comunicación, el cual las distribuye a los suscriptores interesados en temas específicos.
+	Tema: Proyecto Sistema de Comunicacion
+	Objetivo: Este proyecto implementa un sistema de distribución de noticias usando procesos en C 
+    y comunicación mediante pipes nominales (FIFOs). El sistema permite que un `publicador` envíe 
+    noticias a un `sistema de comunicación`, el cual las distribuye a los `suscriptores` interesados en temas específicos.
 ****************************************************************/
+
 #include <stdio.h>              // Biblioteca estándar para funciones de entrada/salida
 #include <stdlib.h>             // Biblioteca estándar para funciones generales de C
 #include <unistd.h>             // Biblioteca POSIX para funciones de manipulación de archivos y procesos
@@ -47,6 +49,8 @@ int main(int argc, char *argv[]) {
 
     char buffer[BUFFER_SIZE];   // Define el buffer para almacenar cada línea del archivo de noticias
     while (fgets(buffer, sizeof(buffer), file)) {  // Lee cada línea del archivo
+        // Ensure buffer is properly terminated
+        buffer[strcspn(buffer, "\n")] = '\0';  // Remove newline if present
         if (is_valid_news_format(buffer)) {  // Verifica si la línea tiene el formato correcto usando una función de utils.h
             // Abre el pipe para escribir una noticia
             int fd = open(pipePSC, O_WRONLY | O_NONBLOCK);
@@ -58,10 +62,8 @@ int main(int argc, char *argv[]) {
             write(fd, buffer, strlen(buffer));  // Escribe la noticia en el pipe
             close(fd);          // Cierra el pipe para permitir que `sistema` procese cada noticia
 
-            printf("Noticia enviada: %s", buffer); // Imprime un mensaje confirmando el envío de la noticia
+            printf("Noticia enviada: %s \n", buffer); // Imprime un mensaje confirmando el envío de la noticia
             sleep(timeN);       // Espera el tiempo especificado `timeN` antes de enviar la siguiente noticia
-        } else {
-            fprintf(stderr, "Invalid news format: %s", buffer);  // Muestra un mensaje si el formato de la noticia es incorrecto
         }
     }
 

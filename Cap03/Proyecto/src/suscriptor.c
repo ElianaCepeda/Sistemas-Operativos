@@ -3,10 +3,12 @@
 	Autor: Daniel Castro, Maria Ruiz, Daniel Gonzalez, Eliana Cepeda
 	Fecha: Noviembre 2024
 	Materia: Sistemas Operativos
-	Tema: Este proyecto implementa un sistema de distribución de noticias usando procesos en C 
-		y comunicación mediante pipes nominales (FIFOs). El sistema permite que un publicador envíe 
-		noticias a un sistema de comunicación, el cual las distribuye a los suscriptores interesados en temas específicos.
+	Tema: Proyecto Sistema de Comunicacion
+	Objetivo: Este proyecto implementa un sistema de distribución de noticias usando procesos en C 
+    y comunicación mediante pipes nominales (FIFOs). El sistema permite que un `publicador` envíe 
+    noticias a un `sistema de comunicación`, el cual las distribuye a los `suscriptores` interesados en temas específicos.
 ****************************************************************/
+
 #include <stdio.h>              // Incluye funciones estándar de entrada/salida
 #include <stdlib.h>             // Incluye funciones estándar de C
 #include <string.h>             // Incluye funciones para manejo de cadenas
